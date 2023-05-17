@@ -1,0 +1,8 @@
+venv_1/
+venv/
+.vscode/
+__pycache__
+*dataset/
+media/
+db.sqlite3
+

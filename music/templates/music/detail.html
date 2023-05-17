@@ -1,0 +1,131 @@
+{% extends 'music/base.html' %}
+{% block title %}{{ album }}{% endblock %}
+{% block albums_active %}active{% endblock %}
+
+{% block body %}
+<div class="container-fluid songs-container">
+
+    <div class="row">
+
+        <!-- Left Album Info -->
+        <div class="col-sm-4 col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <a href="{% url 'music:detail' album.id %}">
+                        {% if album.album_logo %}
+                            <img src="{{ album.album_logo.url }}" class="img-responsive">
+                        {% else %}
+                            <h3>No image to display</h3>
+                        {% endif %}
+                    </a>
+                    <h1>{{ album.artist }}</h1>
+                    <p class="album-title">{{ album.album_title }}</p>
+                    <h6 class="genre">{{ album.genre }}</h6>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Song Info -->
+        <div class="col-sm-8 col-md-9">
+
+            <ul class="nav nav-pills" style="margin-bottom: 10px;">
+                <li role="presentation" class="active"><a href="{% url 'music:detail' album.id %}">View All</a></li>
+                <li role="presentation"><a href="{% url 'music:create_song' album.id %}">Add New Song</a></li>
+                <li role="presentation"><a href="{% url 'music:download_song' album.id %}">Download New Song</a></li>
+            </ul>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <h3>All Songs</h3>
+
+                    {% if error_message %}
+                        <p class="error_message"><strong>{{ error_message }}</strong></p>
+                    {% endif %}
+
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Audio File</th>
+                            <th>Favorite</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for song in album.song_set.all %}
+                            <tr>
+                                <td>{{ song.song_title }}</td>
+                                <td>
+                                    <a target="_blank" href="{{ song.audio_file.url }}">
+                                        <button type="button" class="btn btn-success btn-xs">
+                                            <a href="javascript:showhide('footer','{{ song.audio_file.url }}','{{ song.song_title }}')">
+                                            <span class="glyphicon glyphicon-play" ></span>&nbsp; Play
+                                        </a>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{% url 'music:favorite' song.id %}" class="btn-favorite"><span class="glyphicon glyphicon-star {% if song.is_favorite %}active{% endif %}"></span></a>
+                                </td>
+                                <td>
+                                    <form action="{% url 'music:delete_song' album.id song.id %}" method="post" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="song_id" value="{{ song.id }}" />
+                                        <button type="submit" class="btn btn-danger btn-xs">
+                                            <span class="glyphicon glyphicon-remove"></span>&nbsp; Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <footer class="footer" id = "footer" style = " position: fixed; bottom: 0;width: 100%;">
+        <div class="player" style="padding-left: 10px;padding-top:10px;background-color: #030a11;">
+          <div class="right">
+             <div class="top">
+                <a id = "title" class="song" style="margin-left: 15px;color: white;"></a>
+             </div>
+             <div class="bottom">
+                <audio id="audio" controls="controls" name="media" style="margin-left: 20px;margin-bottom: 10px;width: 1230px;height:30px"><source id="audioSource" src=""> type="audio/mpeg" ></audio>
+              </div>
+          </div>
+        </div>
+    </footer>
+
+    <script>
+
+        function showhide(id,url,title) {
+        var e = document.getElementById(id);
+        var audio = document.getElementById('audio');
+        var source = document.getElementById('audioSource');
+       if(e.style.display == 'block')
+       {
+          e.style.display = 'none';
+          audio.pause();
+          audio.currentTime = 0;
+       }
+       else
+       {
+        e.style.display = 'block';
+        var title_1 = document.getElementById('title');
+        title_1.innerHTML = title;
+        source.src = url;
+        audio.load();
+        audio.play();
+       }
+        
+     }
+    </script>
+
+</div>
+
+{% endblock %}
